@@ -1,0 +1,60 @@
+---
+title: "Class 12 Lab Session"
+author: "Matthew Huang"
+date: "2026-02-16"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Section 1. Proportion og G/G in a population
+
+Downloaded a CSV file from Ensemble 
+
+Here we read this CSV files 
+
+```{r}
+mxl <- read.csv("Sample Genotypes rs8069176 Homo sapiens.csv")
+head(mxl)
+```
+
+```{r}
+table(mxl$Genotype..forward.strand.) / nrow(mxl) * 100
+```
+
+Now let's take a look at a different population. I picked the GBR. 
+```{r}
+gbr <- read.csv("Sample Genotypes rs8069176 Homo sapiens.csv")
+```
+
+Find proportion of G|G
+
+```{r}
+table(gbr$Genotype..forward.strand.) / nrow(gbr) * 100
+```
+
+
+This variant associated with childhood asthma is more frequent in 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

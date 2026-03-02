@@ -1,0 +1,85 @@
+---
+title: "HW6"
+author: "Matthew Huang (PID: A17978767)"
+format: pdf
+---
+
+## Code
+
+```{r}
+analyze_protein_bfactors <- function(pdb_ids, plot_id = pdb_ids[1], 
+                                     chain = "A", elety = "CA", show_sse = TRUE) 
+  {
+  # Inputs:
+  # - pdb_ids is the character vector of PDB IDs, like c("4AKE","1AKE","1E4Y")
+  # - plot_id is the single PDB ID from pdb_ids that you want to plot
+  # - chain is the chain kept with default "A"
+  # - elety is the atom type kept with default "CA"
+  # - show_sse: shows TRUE/FALSE; if FALSE it will remove the marginal SSE rectangles
+  
+  # What the function does:
+  # For each PDB ID, it reads structure, then trims to selected chain+atom type
+  # extracts the B-factors, and then plots B-factors for the requested plot_id.
+  
+  # Output:
+  # Returns a named list of B-factor vectors with one element per input PDB ID.
+  
+  library(bio3d)
+  
+  # Initial Checks
+  stopifnot(is.character(pdb_ids))
+  stopifnot(length(pdb_ids) >= 1)
+  stopifnot(plot_id %in% pdb_ids)
+  
+  b_factors <- list()
+  sse_info <- list()
+  
+  # Loop over any number of input structures to generalizes s1/s2/s3
+  for (id in pdb_ids) {
+    pdb <- read.pdb(id)
+    pdb_trim <- trim.pdb(pdb, chain = chain, elety = elety)
+    
+    b_factors[[id]] <- pdb_trim$atom$b
+    sse_info[[id]] <- pdb_trim
+  }
+  
+  # Plot for the requested protein
+  if (show_sse) {
+    plotb3(b_factors[[plot_id]], sse = sse_info[[plot_id]],
+           typ = "l", ylab = "Bfactor")
+  } else {
+    plotb3(b_factors[[plot_id]], sse = NULL,
+           typ = "l", ylab = "Bfactor")
+  }
+  
+  return(b_factors)
+}
+```
+
+## Example Run 
+
+```{r}
+
+# This should result in a B-factor plot for our requested structure:
+bf <- analyze_protein_bfactors(
+  pdb_ids = c("4AKE", "1AKE", "1E4Y"),
+  plot_id = "4AKE",
+  chain = "A",
+  elety = "CA",
+  show_sse = TRUE
+)
+
+# Showing a small piece of the returned output to confirm the function return:
+head(bf[["4AKE"]])
+
+# Plotting another to demonstrate generalizatoin
+analyze_protein_bfactors(
+  pdb_ids = c("4AKE", "1AKE", "1E4Y"),
+  plot_id = "1AKE",
+  chain = "A",
+  elety = "CA",
+  show_sse = FALSE
+)
+```
+
+This function generalizes the original script by accepting a user-supplied vector of PDB IDs, instead of hard-coding 4AKE, 1AKE, and 1E4Y, and using a loop to apply the same workflow, which is to read the structure, subset to the chosen chain and atom type, and then extract B-factors for any number of input proteins. It then produces the requested B-factor plot for a specific structure chosen via plot_id and returns the B-factor vectors for all inputs, making the analysis reusable and avoiding repeated copy/paste code.

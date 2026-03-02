@@ -1,0 +1,98 @@
+---
+title: "Class 10: Structural Bioinformatics"
+author: "Matthew Huang (A17978767)"
+format: pdf
+---
+
+## Introduction to the RCSB PDB
+
+The [Protein Data Bank (PDB)](http://www.rcsb.org/) is the main repository of biomolecular structure data. Let's see what's in it.
+
+>Q1. What percentage of structures in the PDB are solved by X-Ray and Electron Microscopy?
+
+Roughly 94%
+
+>Q2. What proportion of structures in the PDB are proteins?
+
+Roughly 86%
+
+```{r}
+stats <- read.csv("pdbstats.csv", row.names = 1)
+stats
+```
+
+```{r}
+n.sums <- colSums(stats)
+n <- n.sums/n.sums["Total"] 
+round(n, digits=2)
+```
+
+> What's the total number of entries in the PDB?
+
+```{r}
+n.sums["Total"]
+```
+
+## Using Molstar
+
+We can use the main [Molstar viewer online](https://molstar.org/viewer/):  
+
+![View of HIV-Pr dimer with a bound inhibitor](1hsgfirstview.png)
+
+> Generate and insert an image of the HIV-Pr cartoon colored by secondary structure, showing the inhibitor (ligand) in ball and stick. 
+
+![Ligand with ball and stick viewer](1HSGballandstick.png)
+
+> Generate and insert an image of the HIV-Pr cartoon colored by secondary structure, showing the inhibitor (ligand) in spacefill.
+
+![Ligand with spacefill representation](1HSGspacefill.png)
+
+> One final image showing catalytic APS 25 as ball and stick and the all-important active site water molecules as spacefill
+
+![Final Ligand Visualization](1hsgfinal.png)
+
+## Bio3D package fpor structural bioinformatics
+
+```{r}
+library(bio3d)
+hiv <- read.pdb("1hsg")
+hiv
+```
+
+```{r}
+head(hiv$atom)
+```
+
+```{r}
+pdbseq(hiv)
+```
+
+Lets try out the new **bio3dview** package that is not yet on CRAN. 
+We can use the **remotes** package to install any R package from GitHub 
+
+## Quick viewing of PDB
+
+```{r}
+#library(bio3dview)
+#sele <- atom.select(hiv, resno=25)
+#view.pdb(hiv, backgroundColor = "pink",
+ #        highlight = sele,
+  #       highlight.style = "spacefill")
+```
+
+## Prediction of Protein flexibility
+```{r}
+adk <- read.pdb("6s36")
+m <- nma(adk)
+plot(m)
+```
+
+Write out our results as a trajectory movie:
+
+```{r}
+mktrj(m, file="results.pdb")
+```
+
+```{r}
+#view.nma(m)
+```

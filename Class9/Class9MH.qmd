@@ -1,0 +1,216 @@
+---
+title: "Class 9: Candy Mini-Project"
+author: "Matthew Huang (A17978767)"
+format: pdf
+---
+
+## 1. Background
+Your task is to explore their candy dataset to find out answers to these types of questions - but most of all your job is to have fun, learn by doing hands on data analysis, and hopefully make this type of analysis less frightening for the future! Let’s get started.
+
+## 2. Importing Candy Data
+
+```{r}
+candy_file <- "candy-data.csv"
+
+candy = read.csv(candy_file, row.names=1)
+head(candy)
+```
+
+## 2.1 What is in the dataset?
+
+>Q1. How many different candy types are in this dataset? 
+
+```{r}
+nrow(candy)
+```
+
+
+>Q2. How many fruity candy types are in the dataset? 
+
+```{r}
+sum(candy$fruity == 1)
+```
+
+## 2.2 What is your favorite candy?
+
+```{r}
+candy["Twix", ]$winpercent
+```
+
+```{r}
+library(dplyr)
+
+candy |> 
+  filter(row.names(candy)=="Twix") |> 
+  select(winpercent)
+```
+
+>Q3. What is your favorite candy (other than Twix) in the dataset and what is it’s `winpercent` value?
+
+```{r}
+candy["Snickers", "winpercent"]
+```
+
+>Q4. What is the `winpercent` value for “Kit Kat”?
+
+```{r}
+candy["Kit Kat", "winpercent"]
+```
+
+>Q5. What is the `winpercent` value for “Tootsie Roll Snack Bars”?
+
+```{r}
+candy["Tootsie Roll Snack Bars", "winpercent"]
+```
+
+## **Side-Note:** : the skimr::skim() function
+There is a useful skim() function in the skimr package that can help give you a quick overview of a given dataset. Let’s install this package and try it on our candy data.
+
+```{r}
+library("skimr")
+skim(candy)
+```
+
+>Q6. Is there any variable/column that looks to be on a different scale to the majority of the other columns in the dataset?
+
+The winpercent variable.
+
+>Q7. What do you think a zero and one represent for the `candy$chocolate` column?
+
+Zeros are for non-chocolate candies, and the ones are for chocolates. 
+
+## 3. Exploratory Analysis
+>Q8. Plot a histogram of `winpercent` values using both base R an ggplot2.
+
+```{r}
+hist(candy$winpercent,
+     main = "Distribution of Candy Win Percent",
+     xlab = "Win Percent",
+     col = "blue")
+```
+
+>Q9. Is the distribution of `winpercent` values symmetrical?
+
+```{r}
+summary(candy$winpercent)
+```
+
+No, slightly right skewed. 
+
+>Q10. Is the center of the distribution above or below 50%?
+
+Below 50%.
+
+>Q11. On average is chocolate candy higher or lower ranked than fruit candy?
+
+```{r}
+mean(candy$winpercent[candy$chocolate == 1])
+mean(candy$winpercent[candy$fruity == 1])
+```
+On average, chocolate candies have higher winpercent values than fruity candies.
+
+>Q12. Is this difference statistically significant?
+
+```{r}
+t.test(
+  candy$winpercent[candy$chocolate == 1],
+  candy$winpercent[candy$fruity == 1]
+)
+```
+With the t-test yielding a p-value <0.05, the difference is statistically significant. 
+
+## 4. Overall Candy Rankings
+
+Let’s use the base R `order()` function together with `head()` to sort the whole dataset by `winpercent`. Or if you have been getting into the tidyverse and the *dplyr* package you can use the `arrange()` function together with `head()` to do the same thing and answer the following questions:
+
+>Q13. What are the five least liked candy types in this set?
+
+```{r}
+head(candy[order(candy$winpercent), ], 5)
+```
+Nik L Nip, Boston Baked Beans, Chiclets, Super Bubble, and Jawbusters
+
+>Q14. What are the top 5 all time favorite candy types out of this set?
+
+```{r}
+head(candy[order(candy$winpercent, decreasing = TRUE), ], 5)
+```
+Reese's PB Cups, Reese's Minis, Twix, Kit Kats, and Snickers 
+
+>Q15. Make a first barplot of candy ranking based on `winpercent` values.
+
+```{r}
+library(ggplot2)
+
+ggplot(candy) +
+  aes(winpercent, rownames(candy)) +
+  geom_col()
+```
+
+>Q16. This is quite ugly, use the `reorder()` function to get the bars sorted by `winpercent?`
+
+```{r}
+ggplot(candy) +
+  aes(winpercent, reorder(rownames(candy), winpercent)) +
+  geom_col()
+```
+
+## 4.0.1 Time to add some useful color
+
+Let’s setup a color vector (that signifies candy type) that we can then use for some future plots. We start by making a vector of all black values (one for each candy). Then we overwrite chocolate (for chocolate candy), brown (for candy bars) and red (for fruity candy) values.
+
+```{r}
+my_cols=rep("black", nrow(candy))
+my_cols[as.logical(candy$chocolate)] = "chocolate"
+my_cols[as.logical(candy$bar)] = "yellow"
+my_cols[as.logical(candy$fruity)] = "pink"
+```
+
+Now let’s try our barplot with these colors. Note that we use `fill=my_cols` for `geom_col()`. Experiment to see what happens if you use `col=mycols`.
+
+```{r, fig.height=12}
+ggplot(candy) + 
+  aes(winpercent, reorder(rownames(candy),winpercent)) +
+  geom_col(fill=my_cols) 
+```
+
+>Q17. What is the worst ranked chocolate candy?
+
+Sixlets
+
+>Q18. What is the best ranked fruity candy?
+
+Starbursts
+
+## 5. Taking a look at pricepercent
+
+What about value for money? What is the best candy for the least money? One way to get at this would be to make a plot of `winpercent` vs the `pricepercent` variable. The `pricepercent` variable records the percentile rank of the candy’s price against all the other candies in the dataset. Lower values are less expensive and higher values are more expensive.
+
+To this plot we will add text labels so we can more easily identify a given candy. There is a regular `geom_label()` that comes with ggplot2. However, as there are quite a few candies in our dataset lots of these labels will be overlapping and hard to read. To help with this we can use the `geom_text_repel()` function from the *ggrepel* package.
+
+```{r}
+library(ggrepel)
+
+ggplot(candy) +
+  aes(winpercent, pricepercent, label = rownames(candy)) +
+  geom_point(col = my_cols) +
+  geom_text_repel(col = my_cols, size = 3.3, max.overlaps = 5)
+```
+
+>Q19. Which candy type is the highest ranked in terms of `winpercent` for the least money - i.e. offers the most bang for your buck?
+
+```{r}
+ord <- order(candy$pricepercent)
+head(candy[ord, c(11,12)], n = 10)
+```
+
+Tootsie Roll Midgies. 
+
+>Q20. What are the top 5 most expensive candy types in the dataset and of these which is the least popular?
+
+```{r}
+ord <- order(candy$pricepercent, decreasing = TRUE)
+head(candy[ord, c(11,12)], n = 5)
+```
+The five most expensive candies are Nik L Nip, Nestle Smarties, Ring Pop, Hershey’s Krackel, and Hershey’s Milk Chocolate.
+Among these, Nik L Nip is the least popular (lowest winpercent).

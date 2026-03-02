@@ -1,0 +1,53 @@
+---
+title: "Class12"
+author: "Matthew Huang (A17978767)"
+format: pdf
+
+---
+
+```{r}
+dat <- read.table("rs8067378_ENSG00000172057.6.csv.txt",
+                  header = TRUE, stringsAsFactors = FALSE)
+head(dat)
+```
+
+                  
+## Q13: Sample size per genotype + median expression 
+
+# Sample size per genotype 
+
+```{r}
+n_per_geno <- table(dat$geno)
+n_per_geno
+```
+
+# Median expression per genotype 
+
+```{r}
+median_per_geno <- tapply(dat$exp, dat$geno, median, na.rm = TRUE)
+median_per_geno
+```
+
+## Q14: make a boxplot (one box per genotype)
+
+```{r}
+boxplot(exp ~ geno, data = dat,
+        xlab = "Genotype (rs8067378)",
+        ylab = "ORMDL3 expression",
+        main = "ORMDL3 expression by rs8067378 genotype")
+
+
+bp_obj <- boxplot(exp ~ geno, data = dat, plot = FALSE)
+bp_medians <- bp_obj$stats[3, ]   
+
+text(x = 1:length(bp_medians),
+     y = bp_medians,
+     labels = round(bp_medians, 2),
+     pos = 3)
+```
+
+
+
+
+
+

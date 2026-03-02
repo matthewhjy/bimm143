@@ -1,0 +1,15 @@
+{
+  "hash": "f1c9ecf01c0138a2bad85261f9c86748",
+  "result": {
+    "engine": "knitr",
+    "markdown": "\n::: {.cell}\n\n```{.r .cell-code}\nanalyze_protein_bfactors <- function(pdb_ids, plot_id = pdb_ids[1],\n                                     chain = \"A\", elety = \"CA\", show_sse = TRUE) {\n  # Inputs:\n  # - pdb_ids: character vector of PDB IDs, e.g. c(\"4AKE\",\"1AKE\",\"1E4Y\")\n  # - plot_id: the single PDB ID from pdb_ids that you want to plot\n  # - chain: chain to keep (default \"A\")\n  # - elety: atom type to keep (default \"CA\")\n  # - show_sse: TRUE/FALSE; if FALSE, removes the marginal SSE rectangles\n  \n  # What the function does:\n  # For each PDB ID, it reads the structure, trims to the selected chain + atom type,\n  # extracts the B-factors, and then plots B-factors for the requested plot_id.\n  \n  # Output:\n  # Returns a named list of B-factor vectors (one element per input PDB ID).\n  \n  library(bio3d)\n  \n  # Basic checks (kept minimal and covered in lecture)\n  stopifnot(is.character(pdb_ids))\n  stopifnot(length(pdb_ids) >= 1)\n  stopifnot(plot_id %in% pdb_ids)\n  \n  b_factors <- list()\n  sse_info <- list()\n  \n  # Loop over any number of input structures (generalizes s1/s2/s3)\n  for (id in pdb_ids) {\n    pdb <- read.pdb(id)\n    pdb_trim <- trim.pdb(pdb, chain = chain, elety = elety)\n    \n    b_factors[[id]] <- pdb_trim$atom$b\n    sse_info[[id]] <- pdb_trim\n  }\n  \n  # Plot for the requested protein\n  if (show_sse) {\n    plotb3(b_factors[[plot_id]], sse = sse_info[[plot_id]],\n           typ = \"l\", ylab = \"Bfactor\")\n  } else {\n    plotb3(b_factors[[plot_id]], sse = NULL,\n           typ = \"l\", ylab = \"Bfactor\")\n  }\n  \n  return(b_factors)\n}\n```\n:::\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
