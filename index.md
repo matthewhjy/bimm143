@@ -34,7 +34,7 @@ Class14 [Project: RNA-Seq mini project](class14/class14MH.md)
 
 Class16 [Unix Basics](Class16.pdf)
 
-Class17 [Analyzing sequencing data in the cloud](Class17/.md)
+Class17 [Analyzing sequencing data in the cloud](Class17/Class17Analysis.html)
 
 Class18 [Project: Investigating pertussis resurgence mini-project](Class18/Class18MH.pdf)
 
