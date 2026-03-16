@@ -1,4 +1,4 @@
-# bimm143
+# BIMM 143
 My portfolio from [BIMM 143 W26](https://bioboot.github.io/bimm143_W26/) at UCSD
 
 ## Material Index
