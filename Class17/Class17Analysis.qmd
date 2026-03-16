@@ -1,0 +1,130 @@
+---
+title: "Class 17: Downstream Analysis"
+author: "Matthew Huang"
+date: "3/9/26"
+format: pdf
+editor: visual
+---
+
+```{r}
+library(tximport)
+
+base <- "/Users/matthewhuang/BIMM 143 correct/BIMM 143/Class17"
+
+folders <- list.files(base, pattern = "_quant$", full.names = FALSE)
+samples <- sub("_quant$", "", folders)
+files <- file.path(base, folders, "abundance.h5")   
+names(files) <- samples
+
+stopifnot(length(files) > 0)
+stopifnot(all(file.exists(files)))
+
+txi.kallisto <- tximport(files, type="kallisto", txOut=TRUE)
+```
+
+```{r}
+head(txi.kallisto$counts)
+```
+
+```{r}
+colSums(txi.kallisto$counts)
+```
+
+```{r}
+sum(rowSums(txi.kallisto$counts)>0)
+```
+
+```{r}
+to.keep <- rowSums(txi.kallisto$counts) > 0
+kset.nonzero <- txi.kallisto$counts[to.keep,]
+```
+
+```{r}
+keep2 <- apply(kset.nonzero,1,sd)>0
+x <- kset.nonzero[keep2,]
+```
+
+## Principal Component Analysis
+```{r}
+pca <- prcomp(t(x), scale=TRUE)
+```
+
+```{r}
+summary(pca)
+```
+
+```{r}
+plot(pca$x[,1], pca$x[,2],
+     col=c("blue","blue","red","red"),
+     xlab="PC1", ylab="PC2", pch=16)
+```
+
+## Q. Use ggplot to make a similar figure of PC1 vs PC2 and a separate figure PC1 vs PC3 and PC2 vs PC3
+
+```{r}
+library(ggplot2)
+
+pc_df <- as.data.frame(pca$x)
+pc_df$sample <- rownames(pc_df)
+
+pc_df$condition <- ifelse(pc_df$sample %in% c("SRR2156848","SRR2156849"),
+                          "control", "treated")
+
+plot_pcs <- function(df, xpc, ypc) {
+  ggplot(df, aes(x = .data[[xpc]], y = .data[[ypc]],
+                 color = condition, label = sample)) +
+    geom_point(size = 3) +
+    geom_text(vjust = -0.6, hjust = 0.5, show.legend = FALSE) +
+    labs(x = xpc, y = ypc) +
+    scale_color_manual(values = c(control = "blue", treated = "red")) +
+    theme_minimal()
+}
+
+p12 <- plot_pcs(pc_df, "PC1", "PC2")
+p13 <- plot_pcs(pc_df, "PC1", "PC3")
+p23 <- plot_pcs(pc_df, "PC2", "PC3")
+
+p12
+p13
+p23
+```
+
+## Differential expression analysis
+
+```{r}
+library(DESeq2)
+```
+
+```{r}
+sampleTable <- data.frame(condition = factor(rep(c("control", "treatment"), each = 2)))
+rownames(sampleTable) <- colnames(txi.kallisto$counts)
+```
+
+```{r}
+sampleTable <- data.frame(
+  condition = factor(
+    ifelse(colnames(txi.kallisto$counts) %in% c("SRR2156848","SRR2156849"),
+           "control", "treatment")
+  )
+)
+rownames(sampleTable) <- colnames(txi.kallisto$counts)
+sampleTable
+```
+
+```{r}
+dds <- DESeqDataSetFromTximport(txi.kallisto,
+                                sampleTable, 
+                                ~condition)
+```
+
+Using counts and average transcript lengths from tximport
+
+```{r}
+dds <- DESeq(dds)
+```
+
+```{r}
+res <- results(dds)
+head(res)
+```
+
