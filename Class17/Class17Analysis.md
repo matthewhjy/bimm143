@@ -1,4 +1,9 @@
-# Class 17: Downstream Analysis
+---
+layout: page
+title: "Class 17: Downstream Analysis"
+permalink: /Class17/
+---
+
 Matthew Huang
 2026-03-09
 

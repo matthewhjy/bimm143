@@ -1,4 +1,9 @@
-# Class12
+---
+layout: page
+title: "Class 12"
+permalink: /Class12/
+---
+
 Matthew Huang (A17978767)
 
 ``` r
