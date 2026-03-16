@@ -4,3 +4,12 @@
 .Ruserdata
 .DS_Store
 **/.DS_Store
+# Quarto / RStudio generated
+.quarto/
+**/.quarto/
+**/_site/
+**/_cache/
+**/_files/
+**/site_libs/
+**/*_files/
+**/.Rproj.user/
