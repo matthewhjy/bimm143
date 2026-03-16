@@ -13,3 +13,14 @@
 **/site_libs/
 **/*_files/
 **/.Rproj.user/
+# Quarto / RStudio generated
+.quarto/
+**/.quarto/
+**/_freeze/
+**/_site/
+**/_cache/
+**/site_libs/
+**/*_files/
+**/.Rproj.user/
+.DS_Store
+**/.DS_Store
